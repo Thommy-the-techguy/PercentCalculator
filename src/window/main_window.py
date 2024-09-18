@@ -8,7 +8,7 @@ from window.payment_window import PaymentWindow
 from util.excel_util import *
 
 @final
-class MainWindow(Tk): #TODO: remove unnecessary code, since inheritance can be used instead
+class MainWindow():
     __main_window: Tk = None
     __date_picker: Calendar = None
     __confirm_button: Button = None
@@ -61,7 +61,7 @@ class MainWindow(Tk): #TODO: remove unnecessary code, since inheritance can be u
             JsonUtil.serialize_current_date(f"{picked_month}", "ser.json")
         elif serialized_month == picked_month:
             print("going further!")
-            PaymentWindow(self.__main_window)
+            PaymentWindow(self)
 
     def __check_if_new_month(self) -> bool:
         month_written = int(JsonUtil.deserialize_current_date("ser.json"))
@@ -83,43 +83,8 @@ class MainWindow(Tk): #TODO: remove unnecessary code, since inheritance can be u
         
         return list_of_indicies
     
-    # def __form_new_data_frame(self, data: dict, indicies: list) -> ps.DataFrame:
-    #     new_data: dict = {}
-
-    #     for key in data.keys():
-    #         new_data[key] = []
-
-    #     for key in data.keys():
-    #         for index in indicies:
-    #             match key:
-    #                 case "Кол-во дней":
-    #                     selected_year: int = int(self.get_date_picker().selection_get().year)
-    #                     selected_month: int = int(self.get_date_picker().selection_get().month)
-
-    #                     new_data[key].append(calendar.monthrange(selected_year, selected_month)[1])
-    #                 case "Остаток неоплаченной суммы":
-    #                     sum_ttn: float = float(new_data["Сумма ТТН"][index])
-    #                     paid_sum: float = float(new_data["Оплаченная сума"][index])
-
-    #                     new_data[key].append(sum_ttn - paid_sum)    
-    #                 case "Сумма коммерческого займа":
-    #                     sum_left: float = float(new_data["Остаток неоплаченной суммы"][index])
-    #                     percents: float = float(new_data["%-я ставка"][index]) / 100
-    #                     days_amount: int = int(new_data["Кол-во дней"][index])
-                        
-    #                     new_data[key].append(round(sum_left * percents * days_amount, 2))
-    #                 case _:
-    #                     new_data[key].append(data[key][index])
-        
-    #     return ps.DataFrame(new_data)
     def __days_func(self) -> int:
         year: int = self.get_date_picker().selection_get().year
         month: int = self.get_date_picker().selection_get().month
 
         return calendar.monthrange(year, month)[1]
-    
-    # def __write_data_to_excel(self, data_frame: ps.DataFrame, file_path: str):
-    #     month_chosen = int(self.get_date_picker().get_displayed_month()[0]) 
-
-    #     with ps.ExcelWriter(file_path, date_format="%d.%m.%Y", mode="a") as writer:
-    #         data_frame.to_excel(writer, sheet_name=f"{month_chosen}", index=False)
