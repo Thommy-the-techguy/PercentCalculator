@@ -4,6 +4,7 @@ from util.excel_util import *
 import pandas as ps
 import datetime
 from tkcalendar import Calendar
+from numpy import nan
 
 @final
 class PaymentWindow():
@@ -47,7 +48,7 @@ class PaymentWindow():
     def __payment_button_action(self):
         excel_data: dict = read_excel_data("data.xlsx")
         additional_data, item_index = self.__add_payment()
-        data_frame: ps.DataFrame = self.merge_frames(excel_data, additional_data, item_index)
+        data_frame: ps.DataFrame = merge_frames(excel_data, additional_data, item_index)
         file_name: str = "data.xlsx"
 
         write_data_to_excel(data_frame, file_name, get_last_sheet_name(file_name))
@@ -56,7 +57,7 @@ class PaymentWindow():
         ttn: int = int(self.__ttn_text_box.get("1.0", END).strip())
         payment_sum: float = float(self.__payment_sum_text_box.get("1.0", END).strip())
         excel_data: dict = read_excel_data("data.xlsx")
-        additional: dict = self.create_dict_with_frame_keys(excel_data)
+        additional: dict = create_dict_with_frame_keys(excel_data)
 
         item_index: int = 0
         for index in range(0, len(excel_data["№ ТТН"])):
@@ -70,7 +71,14 @@ class PaymentWindow():
                         case "№ п/п":
                             additional["№ п/п"].append(excel_data["№ п/п"][item_index] + 1)
                         case "Оплаченная сумма":
-                            if excel_data["Оплаченная сумма"][item_index] == 0:
+                            prev_payment_month: int = None
+                            if str(excel_data["Дата оплаты"][item_index]) != "nan":
+                                print(str(excel_data["Дата оплаты"][item_index]) == "nan")
+                                prev_payment_month = datetime.datetime.strptime(str(excel_data["Дата оплаты"][item_index]), "%d.%m.%Y").date().month
+                            
+                            current_payment_month: int = calendar_date.month
+
+                            if excel_data["Оплаченная сумма"][item_index] == 0 or current_payment_month > prev_payment_month: #TODO: check this later
                                 new_days_amount: int = calendar_day
 
                                 additional["Кол-во дней"].append(new_days_amount)
@@ -104,33 +112,6 @@ class PaymentWindow():
             item_index += 1  
 
         return (additional, item_index + 1)
-    
-    def merge_frames(self, data: dict, additional_data: dict, position: (int | None)=None) -> ps.DataFrame:
-        new_data: dict = self.create_dict_with_frame_keys(data)
-
-        for key in data.keys():
-            for value in data[key]:
-                new_data[key].append(value)
-
-        for key in new_data.keys():
-            for value in additional_data[key]:
-                if position == None:
-                    new_data[key].append(value)
-                else:
-                    new_data[key].insert(position, value)
-                    if key == "№ п/п":
-                        for i in range(position + 1, len(new_data[key])):
-                            new_data[key][i] += 1
-
-        return ps.DataFrame(new_data)
-
-    def create_dict_with_frame_keys(self, template: dict) -> dict:
-        output: dict = {}
-
-        for key in template.keys():
-            output[key] = []
-
-        return output
 
     def get_window(self) -> Toplevel:
         return self.__window

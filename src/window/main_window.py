@@ -74,12 +74,15 @@ class MainWindow():
     def __check_if_not_covered(self, data: dict) -> list:
         list_of_indicies: list = []
 
-        count: int = 0
-        for value in data["Остаток неоплаченной суммы"]:
-            if (float(value) > 0):
-                list_of_indicies.append(count)
+        # count: int = 0
+        # for value in data["Остаток неоплаченной суммы"]:
+        #     if (float(value) > 0):
+        #         list_of_indicies.append(count)
 
-            count += 1
+        #     count += 1
+        for i in range(0, len(data["№ ТТН"])):
+            if ((i + 1) >= len(data["№ ТТН"]) or data["№ ТТН"][i] != data["№ ТТН"][i + 1]) and data["Остаток неоплаченной суммы"][i] > 0:
+                list_of_indicies.append(i)
         
         return list_of_indicies
     

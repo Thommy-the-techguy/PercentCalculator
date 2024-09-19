@@ -26,6 +26,8 @@ def form_new_data_frame(data: dict, indicies: (list | None), days_value: (int | 
         new_index: int = 0
         for index in indicies:
             match key:
+                case "№ п/п":
+                    new_data[key].append(new_index + 1)
                 case "Кол-во дней":
                     if days_value != None:
                         new_data[key].append(days_value)
@@ -58,3 +60,30 @@ def write_data_to_excel(data_frame: ps.DataFrame, file_path: str, sheet_name: st
             print("Worksheet doesn't exist!")
         finally:
             data_frame.to_excel(writer, sheet_name=sheet_name, index=False)
+
+def merge_frames(data: dict, additional_data: dict, position: (int | None)=None) -> ps.DataFrame:
+        new_data: dict = create_dict_with_frame_keys(data)
+
+        for key in data.keys():
+            for value in data[key]:
+                new_data[key].append(value)
+
+        for key in new_data.keys():
+            for value in additional_data[key]:
+                if position == None:
+                    new_data[key].append(value)
+                else:
+                    new_data[key].insert(position, value)
+                    if key == "№ п/п":
+                        for i in range(position + 1, len(new_data[key])):
+                            new_data[key][i] += 1
+
+        return ps.DataFrame(new_data)
+
+def create_dict_with_frame_keys(template: dict) -> dict:
+        output: dict = {}
+
+        for key in template.keys():
+            output[key] = []
+
+        return output
