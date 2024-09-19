@@ -47,7 +47,6 @@ class PaymentWindow():
     def __payment_button_action(self):
         excel_data: dict = read_excel_data("data.xlsx")
         additional_data, item_index = self.__add_payment()
-        # data_frame: ps.DataFrame = form_new_data_frame(data, None, None)
         data_frame: ps.DataFrame = self.merge_frames(excel_data, additional_data, item_index)
         file_name: str = "data.xlsx"
 
@@ -61,7 +60,7 @@ class PaymentWindow():
 
         item_index: int = 0
         for index in range(0, len(excel_data["№ ТТН"])):
-            if excel_data["№ ТТН"][index] == ttn and excel_data["№ ТТН"][index + 1] != ttn:
+            if excel_data["№ ТТН"][index] == ttn and ((index + 1) >= len(excel_data["№ ТТН"]) or (excel_data["№ ТТН"][index + 1] != ttn)):
                 master_window_calendar: Calendar = self.__master_window.get_date_picker()
                 calendar_date: datetime.date = datetime.datetime.strptime(master_window_calendar.get_date(), "%d.%m.%Y").date()
                 calendar_day: int = calendar_date.day
@@ -120,7 +119,8 @@ class PaymentWindow():
                 else:
                     new_data[key].insert(position, value)
                     if key == "№ п/п":
-                        new_data[key][position + 1] += 1
+                        for i in range(position + 1, len(new_data[key])):
+                            new_data[key][i] += 1
 
         return ps.DataFrame(new_data)
 
